@@ -8,6 +8,14 @@ Small, dependency-free Python implementations that accompany the courses at Infe
 | `inference_engine/` | Llama-style forward pass with GQA and a KV cache, a GGUF reader/writer using `mmap`, INT8 and 4-bit quantisation, batching simulation, a streaming server, a C matvec benchmark | Build an Inference Engine |
 | `reasoning/` | pass@k, majority voting, best-of-n with a verifier, a toy GRPO, a cost-versus-accuracy simulator | Build a Reasoning Model |
 | `benchmarking/` | An open-loop load generator, a fake streaming server, latency statistics, closed-loop versus open-loop demonstration, roofline estimates | Inference Engineering |
+| `finetuning/` | LoRA maths, training memory, ZeRO and FSDP sharding, learning-rate and forgetting experiments, a synthetic data pipeline, a tool-call harness, toy contrastive embeddings, and a real LoRA fine-tune of a small model on CPU (needs PyTorch) | Fine-tuning and Customisation |
+| `llm_apps/` | A minimal MCP server and client, context packing, SSE streaming, cost and latency budgets, document chunking, a RAG evaluation loop, an agent lab | Building LLM Applications |
+| `security/` | Secure RAG with access control, chunk screening and output checks; differential privacy on counts | AI Security and Privacy |
+| `evals/` | Agent trajectory scoring; cost and latency evaluation with percentiles and SLO checks | LLM Evaluation and Testing |
+| `multimodal/` | OCR metrics: character and word error rate, field and table-cell accuracy | Multimodal Inference |
+| `production/` | Serverless versus dedicated GPU cost and cold starts | Serving AI in Production |
+
+The Build courses also gained `llm_from_scratch/dedup.py` (MinHash deduplication) and `precision.py` (fp16 and bf16), `inference_engine/chat_template.py` and `constrained_decoding.py`, and `reasoning/test_time_scaling.py` and `prm_search.py`.
 
 ## Run
 
