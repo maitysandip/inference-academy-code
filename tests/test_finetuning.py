@@ -1,4 +1,4 @@
-import subprocess, sys, unittest
+import re, subprocess, sys, unittest
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1] / "finetuning"
@@ -10,7 +10,8 @@ class FineTuningScripts(unittest.TestCase):
     def test_lora_math(self):
         out = run("lora_math.py")
         self.assertIn("base ≈ 8.03B params", out)
-        self.assertIn("max difference: 1.11e-16", out)
+        diff = float(re.search(r"max difference: ([0-9.e+-]+)", out).group(1))
+        self.assertLess(diff, 1e-12)  # floating-point noise only; the exact value varies by Python version
 
     def test_memory_table(self):
         out = run("training_memory.py")
