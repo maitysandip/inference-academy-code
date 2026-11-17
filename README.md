@@ -2,7 +2,7 @@
 
 [![tests](https://github.com/maitysandip/inference-academy-code/actions/workflows/test.yml/badge.svg)](https://github.com/maitysandip/inference-academy-code/actions/workflows/test.yml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
-![Python 3.9+](https://img.shields.io/badge/python-3.9%2B-blue.svg)
+![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-blue.svg)
 
 Small, readable implementations of how LLMs are built, served and measured: a Llama-style inference engine with a KV cache in about 120 lines, a GGUF reader using `mmap`, INT8 and 4-bit quantised matmul, continuous batching, an open-loop load generator that reports goodput, a tiny GPT trained with its own autograd, and more.
 
