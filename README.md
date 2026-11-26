@@ -14,7 +14,7 @@ Almost everything uses the Python standard library only, so you can read every l
 git clone https://github.com/maitysandip/inference-academy-code && cd inference-academy-code
 python3 inference_engine/engine.py          # a tiny Llama-style engine; checks KV cache == recompute
 python3 benchmarking/roofline.py            # decode speed ceilings per GPU from bytes and FLOPs
-python3 -m unittest discover -s tests -v    # 41 fast tests
+python3 -m unittest discover -s tests -v    # 64 tests; the 8 kernel tests need PyTorch and Triton
 ```
 
 | If you want to... | Read | Then the lesson |
@@ -38,6 +38,8 @@ python3 -m unittest discover -s tests -v    # 41 fast tests
 | `evals/` | Agent trajectory scoring; cost and latency evaluation with percentiles and SLO checks | [LLM Evaluation and Testing](https://inferenceacademy.com/courses/evals) |
 | `security/` | Secure RAG with access control, chunk screening and output checks; differential privacy on counts | [AI Security and Privacy](https://inferenceacademy.com/courses/security) |
 | `multimodal/` | OCR metrics: character and word error rate, field and table-cell accuracy | [Multimodal Inference](https://inferenceacademy.com/courses/multimodal) |
+| `gpu_kernels/` | Triton kernels for inference (fused RoPE for Q and K, LayerNorm, a 4-bit weight-only matmul, MoE dispatch with a grouped GEMM, Gumbel-max sampling), two CUDA versions, and one benchmark harness across eager PyTorch, `torch.compile`, Triton and CUDA (needs PyTorch and Triton; tests run on a CPU in the Triton interpreter); `cuda/` holds standalone CUDA programs for a cp.async pipelined matmul, a Hopper TMA tile copy, a persistent warp-specialised kernel and a CuTe layout demo | [GPU Kernels for Inference](https://inferenceacademy.com/courses/gpu-kernels) |
+| `incidents/` | A simulator of one vLLM-style replica (paged KV cache, prefix caching, chunked prefill, preemption, client timeouts) with incident scenarios to diagnose | [Inference Engineering](https://inferenceacademy.com/inference-engineering) |
 | `production/` | Serverless versus dedicated GPU cost and cold starts | [Serving AI in Production](https://inferenceacademy.com/courses/production) |
 
 ## Where each file is explained
@@ -50,6 +52,7 @@ Every file has a lesson that walks through it. Free lessons are readable without
 | [`benchmarking/fake_server.py`](benchmarking/fake_server.py) | [Benchmarking done properly: open loop, percentiles, goodput and honest reporting](https://inferenceacademy.com/learn/inf-benchmarking/benchmarking-done-properly) | Free |
 | [`benchmarking/loadgen.py`](benchmarking/loadgen.py) | [Capstone lab: from baseline to 3x goodput](https://inferenceacademy.com/learn/inf-benchmarking/lab-baseline-to-3x-throughput) | Pro |
 | [`benchmarking/roofline.py`](benchmarking/roofline.py) | [Prefill, decode and the roofline: predicting inference speed](https://inferenceacademy.com/learn/inf-bottlenecks/prefill-decode-and-the-roofline) | Free |
+| [`benchmarking/scaling_report.py`](benchmarking/scaling_report.py) | [Lab: scale one model across 1, 2, 4 and 8 GPUs, with NUMA pinning and storage checked](https://inferenceacademy.com/learn/inf-bottlenecks/lab-scale-one-model-across-1-2-4-and-8-gpus) | Pro |
 | [`evals/cost_latency_eval.py`](evals/cost_latency_eval.py) | [Cost and latency evaluation](https://inferenceacademy.com/learn/eval-practice/cost-and-latency-evaluation) | Pro |
 | [`evals/trajectory_eval.py`](evals/trajectory_eval.py) | [Evaluating agent trajectories](https://inferenceacademy.com/learn/eval-practice/evaluating-agent-trajectories) | Pro |
 | [`finetuning/forgetting.py`](finetuning/forgetting.py) | [Forgetting and choosing a method: full fine-tuning, LoRA, replay and weight interpolation](https://inferenceacademy.com/learn/ft-lora/forgetting-and-choosing-a-method) | Pro |
@@ -61,6 +64,19 @@ Every file has a lesson that walks through it. Free lessons are readable without
 | [`finetuning/toy_embeddings.py`](finetuning/toy_embeddings.py) | [Fine-tuning embedding models and rerankers: contrastive loss, hard negatives and retrieval metrics](https://inferenceacademy.com/learn/ft-labs/fine-tuning-embeddings-and-rerankers) | Pro |
 | [`finetuning/training_memory.py`](finetuning/training_memory.py) | [How much GPU do you need to fine-tune? Memory for full fine-tuning, LoRA and QLoRA](https://inferenceacademy.com/learn/ft-lora/how-much-gpu-to-fine-tune) | Pro |
 | [`finetuning/zero_sharding.py`](finetuning/zero_sharding.py) | [Full fine-tuning and sharding across GPUs](https://inferenceacademy.com/learn/ft-lora/full-fine-tuning-and-sharding) | Pro |
+| [`gpu_kernels/bench.py`](gpu_kernels/bench.py) | [Fused sampling, and one benchmark harness for PyTorch, torch.compile, Triton and CUDA](https://inferenceacademy.com/learn/kern-triton/fused-sampling-and-one-benchmark-harness) | Pro |
+| [`gpu_kernels/cuda/cute_layouts.cu`](gpu_kernels/cuda/cute_layouts.cu) | [Persistent and warp-specialised kernels, and a tour of CUTLASS and CuTe](https://inferenceacademy.com/learn/kern-cuda/persistent-and-warp-specialised-kernels-and-cutlass-cute) | Pro |
+| [`gpu_kernels/cuda/pipelined_matmul.cu`](gpu_kernels/cuda/pipelined_matmul.cu) | [Async copies, TMA and software pipelining](https://inferenceacademy.com/learn/kern-cuda/async-copies-tma-and-software-pipelining) | Pro |
+| [`gpu_kernels/cuda/tma_tile_copy.cu`](gpu_kernels/cuda/tma_tile_copy.cu) | [Async copies, TMA and software pipelining](https://inferenceacademy.com/learn/kern-cuda/async-copies-tma-and-software-pipelining) | Pro |
+| [`gpu_kernels/cuda/warp_specialized_rowsum.cu`](gpu_kernels/cuda/warp_specialized_rowsum.cu) | [Persistent and warp-specialised kernels, and a tour of CUTLASS and CuTe](https://inferenceacademy.com/learn/kern-cuda/persistent-and-warp-specialised-kernels-and-cutlass-cute) | Pro |
+| [`gpu_kernels/cuda_kernels.cu`](gpu_kernels/cuda_kernels.cu) | [Fused sampling, and one benchmark harness for PyTorch, torch.compile, Triton and CUDA](https://inferenceacademy.com/learn/kern-triton/fused-sampling-and-one-benchmark-harness) | Pro |
+| [`gpu_kernels/layernorm.py`](gpu_kernels/layernorm.py) | [RoPE and LayerNorm kernels in Triton](https://inferenceacademy.com/learn/kern-triton/rope-and-layernorm-kernels-in-triton) | Pro |
+| [`gpu_kernels/moe.py`](gpu_kernels/moe.py) | [MoE dispatch and a grouped GEMM in Triton](https://inferenceacademy.com/learn/kern-triton/moe-dispatch-and-a-grouped-gemm-in-triton) | Pro |
+| [`gpu_kernels/rope.py`](gpu_kernels/rope.py) | [RoPE and LayerNorm kernels in Triton](https://inferenceacademy.com/learn/kern-triton/rope-and-layernorm-kernels-in-triton) | Pro |
+| [`gpu_kernels/sampling.py`](gpu_kernels/sampling.py) | [Fused sampling, and one benchmark harness for PyTorch, torch.compile, Triton and CUDA](https://inferenceacademy.com/learn/kern-triton/fused-sampling-and-one-benchmark-harness) | Pro |
+| [`gpu_kernels/w4a16_matmul.py`](gpu_kernels/w4a16_matmul.py) | [A 4-bit weight-only matmul (W4A16) in Triton](https://inferenceacademy.com/learn/kern-triton/a-4-bit-weight-only-matmul-in-triton) | Pro |
+| [`incidents/incident_sim.py`](incidents/incident_sim.py) | [How to work an inference incident: the method and the simulator](https://inferenceacademy.com/learn/inf-incidents/how-to-work-an-inference-incident) | Free |
+| [`incidents/scenarios.py`](incidents/scenarios.py) | [How to work an inference incident: the method and the simulator](https://inferenceacademy.com/learn/inf-incidents/how-to-work-an-inference-incident) | Free |
 | [`inference_engine/batching.py`](inference_engine/batching.py) | [Continuous batching and an OpenAI-style streaming server](https://inferenceacademy.com/learn/engine-fast/batching-and-the-server) | Pro |
 | [`inference_engine/chat_template.py`](inference_engine/chat_template.py) | [Tokenizers and chat templates for real models](https://inferenceacademy.com/learn/engine-core/tokenizers-and-chat-templates) | Pro |
 | [`inference_engine/constrained_decoding.py`](inference_engine/constrained_decoding.py) | [Grammar-constrained decoding inside an engine](https://inferenceacademy.com/learn/engine-core/grammar-constrained-decoding) | Pro |
@@ -84,6 +100,8 @@ Every file has a lesson that walks through it. Free lessons are readable without
 | [`llm_from_scratch/rope_lora.py`](llm_from_scratch/rope_lora.py) | [Modern upgrades: RoPE, RMSNorm, SwiGLU and grouped-query attention](https://inferenceacademy.com/learn/llm-modern/modern-upgrades-rope-rmsnorm-swiglu-gqa) | Pro |
 | [`llm_from_scratch/sampling.py`](llm_from_scratch/sampling.py) | [Generation: sampling strategies and the KV cache](https://inferenceacademy.com/learn/llm-training/generation-sampling-and-kv-cache) | Pro |
 | [`multimodal/ocr_metrics.py`](multimodal/ocr_metrics.py) | [Document AI: OCR, layout, tables and extraction](https://inferenceacademy.com/learn/mm-vision-language/document-ai-ocr-and-layout) | Pro |
+| [`production/break_even.py`](production/break_even.py) | [FinOps for LLM inference: unit cost, utilisation, spot and reserved](https://inferenceacademy.com/learn/prod-delivery/finops-for-llm-inference) | Free |
+| [`production/noisy_neighbour.py`](production/noisy_neighbour.py) | [GPU sharing in practice: MIG, MPS and time-slicing compared, and a noisy neighbour measured](https://inferenceacademy.com/learn/prod-kubernetes/gpu-sharing-mig-mps-and-time-slicing) | Pro |
 | [`production/serverless_vs_dedicated.py`](production/serverless_vs_dedicated.py) | [Serverless GPU platforms: when they save money and when they cost more](https://inferenceacademy.com/learn/prod-architecture/serverless-gpu-platforms) | Pro |
 | [`reasoning/cost_vs_accuracy.py`](reasoning/cost_vs_accuracy.py) | [Lab: cost versus accuracy for reasoning strategies](https://inferenceacademy.com/learn/reason-training/lab-cost-versus-accuracy) | Pro |
 | [`reasoning/methods.py`](reasoning/methods.py) | [Chain of thought and self-consistency: majority voting, and when it fails](https://inferenceacademy.com/learn/reason-inference/chain-of-thought-and-self-consistency) | Pro |
@@ -95,7 +113,7 @@ Every file has a lesson that walks through it. Free lessons are readable without
 ## Run
 
 ```bash
-python3 -m unittest discover -s tests -v        # 41 fast tests
+python3 -m unittest discover -s tests -v        # 64 tests; the 8 kernel tests need PyTorch and Triton
 python3 llm_from_scratch/microgpt.py            # trains the tiny GPT (about 2 minutes, pure Python)
 python3 inference_engine/engine.py              # KV cache equals recompute check
 python3 reasoning/cost_vs_accuracy.py           # strategy comparison table
